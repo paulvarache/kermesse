@@ -1,0 +1,109 @@
+<html>
+
+    <head>
+        <style>
+            .row {
+                position: relative;
+                height: 20%;
+            }
+            .row .character {
+                position: absolute;
+                right: 0%;
+                transition: all ease-out 200ms;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="row1" class="row">
+            <img class="character" id="char1" width="50">
+        </div>
+        <div id="row2" class="row">
+            <img class="character" id="char2" width="50">
+        </div>
+        <div id="row3" class="row">
+            <img class="character" id="char3" width="50">
+        </div>
+        <div id="row4" class="row">
+            <img class="character" id="char4" width="50">
+        </div>
+        <div id="row5" class="row">
+            <img class="character" id="char5" width="50">
+        </div>
+
+        <script>
+
+            // 5 characters all on the right off the screen
+            var chars;
+
+            resetChars();
+
+            function displayWinner(char) {
+                alert('Player ' + char + ' wins');
+            }
+
+            // Move a character a number of steps
+            function moveChar(char, steps) {
+                chars[(char - 1)].pos += (steps * 5);
+                updateChar(char - 1);
+                if (chars[(char - 1)].pos >= 95) {
+                    displayWinner(char);
+                }
+            }
+
+            function resetChars() {
+                chars = [{
+                    pos: 0,
+                    img: 'jake'
+                },{
+                    pos: 0,
+                    img: 'jake'
+                },{
+                    pos: 0,
+                    img: 'jake'
+                },{
+                    pos: 0,
+                    img: 'jake'
+                },{
+                    pos: 0,
+                    img: 'jake'
+                }];
+                updateView();
+            }
+
+            function updateView() {
+                chars.forEach(function (char, index) {
+                    updateChar(index);
+                });
+            }
+
+            function updateChar(id) {
+                var char = chars[id];
+                img = document.querySelector('#char' + (id + 1));
+                img.src = './imgs/' + char.img + '.png';
+                img.style.right = char.pos + '%'; // 5 times the number of steps
+            }
+
+            // Create the server
+            var restify = require('restify'),
+                server = restify.createServer({
+                    name: 'Server'
+                });
+
+            server.use(restify.queryParser())
+                .use(restify.bodyParser());
+
+            // Call this route when a sensor is hit
+            server.post('/hit/:id', function (req, res) {
+                moveChar(req.params.id, req.body);
+                res.send('OK');
+            });
+
+            server.get('/reset', function (req, res) {
+                resetChars();
+                res.send('OK');
+            });
+
+            server.listen(4000);
+        </script>
+    </body>
+</html>
